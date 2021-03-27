@@ -111,7 +111,7 @@ def init_dataFrame(buffer_size=60):
 def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
-    print(init_dataFrame(buffer_size=60))
+    DF_logger = init_dataFrame(buffer_size=60))
 
     while True:
         try:
@@ -146,8 +146,8 @@ def main():
                             output_dict[r[0]] = r[1]
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
-                            print(output_dict)
-                    
+                    DF_logger = DF_logger.append(output_dict, ignore_index=True)
+                    print(DF_logger)
                     print(tabulate(output,
                                    headers=['Description', 'Value', 'Unit'],
                                    tablefmt='github'))
