@@ -138,13 +138,16 @@ def main():
                 if checkcrc(p1telegram):
                     # parse telegram contents, line by line
                     output = []
+                    output_dict = {}
                     for line in p1telegram.split(b'\r\n'):
                         r = parsetelegramline(line.decode('ascii'))
                         if r:
                             output.append(r)
+                            output_dict[r[0]] = r[1]
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
-                            print(output)
+                            print(output_dict)
+                    
                     print(tabulate(output,
                                    headers=['Description', 'Value', 'Unit'],
                                    tablefmt='github'))
