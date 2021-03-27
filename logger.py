@@ -111,7 +111,7 @@ def init_dataFrame(buffer_size=60):
 def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
-    DF_logger = init_dataFrame(buffer_size=60))
+    DF_logger = init_dataFrame(buffer_size=60)
 
     while True:
         try:
