@@ -14,11 +14,13 @@ import serial
 import sys
 import crcmod.predefined
 import re
-from tabulate import tabulate
 import pandas as pd
 
 # Change your serial port here:
 serialport = '/dev/ttyUSB0'
+
+# How much data to store before writing to file (saving SD-card write cycles)
+buffer_size=10
 
 # Enable debug if needed:
 debug = False
@@ -100,7 +102,7 @@ def parsetelegramline(p1line):
     else:
         return ()
 
-def init_dataFrame(buffer_size=60):
+def init_dataFrame():
     columns = ["TIMESTAMP", "CONSUME_DAY_INT", "CONSUME_NIGHT_INT", 
         "PRODUCE_DAY_INT", "PRODUCE_NIGHT_INT", "DAY_OR_NIGHT",
         "CONSUME", "PRODUCE", "VOLTAGE", "CURRENT",
@@ -111,10 +113,14 @@ def init_dataFrame(buffer_size=60):
 def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
-    DF_logger = init_dataFrame(buffer_size=60)
+    DF_logger = init_dataFrame()
 
     while True:
         try:
+            # If buffer is full write to database
+            if len(DF_logger) >= buffer_size:
+                DF_logger = init_dataFrame()
+
             # read input from serial port
             p1line = ser.readline()
             if debug:
@@ -147,10 +153,7 @@ def main():
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
                     DF_logger = DF_logger.append(output_dict, ignore_index=True)
-                    print(DF_logger)
-                    print(tabulate(output,
-                                   headers=['Description', 'Value', 'Unit'],
-                                   tablefmt='github'))
+
         except KeyboardInterrupt:
             print("Stopping...")
             ser.close()
