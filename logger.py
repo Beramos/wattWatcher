@@ -15,6 +15,7 @@ import sys
 import crcmod.predefined
 import re
 from tabulate import tabulate
+import pandas as pd
 
 # Change your serial port here:
 serialport = '/dev/ttyUSB0'
@@ -113,13 +114,18 @@ def parsetelegramline(p1line):
         return ()
 
 def init_dataFrame(buffer_size=60):
-    return 0
-
+    columns = ["TIMESTAMP", "CONSUME_DAY_INT", "CONSUME_NIGHT_INT", 
+        "PRODUCE_DAY_INT", "PRODUCE_NIGHT_INT", "DAY_OR_NIGHT",
+        "CONSUME", "PRODUCE", "VOLTAGE", "CURRENT",
+        "SWITCH_ELECTRICITY"  ,"SWITCH_GAS", "GAS_CONSUME_INT"]
+    return pd.DataFrame(columns=columns)
 
 
 def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
+    println(init_dataFrame(buffer_size=60))
+
     while True:
         try:
             # read input from serial port
