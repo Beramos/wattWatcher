@@ -12,12 +12,13 @@ import sys
 import crcmod.predefined
 import re
 import pandas as pd
+from time import sleep
 
 # Change your serial port here:
 serialport = '/dev/ttyUSB0'
 
 # How much data to store before writing to file (saving SD-card write cycles)
-buffer_size=10
+buffer_size=120
 
 # Enable debug if needed:
 debug = False
@@ -112,12 +113,16 @@ def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
     DF_logger = init_dataFrame()
+    DF_logger.to_sql("data", conn, if_exists='append')
 
     while True:
+        sleep(100e-6)
         try:
+
             # If buffer is full write to database
             if len(DF_logger) >= buffer_size:
-                DF_logger.to_sql("data", conn, if_exists='append')
+                DF_logger.set_index('TIMESTAMP', inplace=True)
+                DF_logger.to_sql("data", conn, if_exists='append')               
                 DF_logger = init_dataFrame()
 
             # read input from serial port
@@ -152,10 +157,10 @@ def main():
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
                     DF_logger = DF_logger.append(output_dict, ignore_index=True)
-
         except KeyboardInterrupt:
             print("Stopping...")
             ser.close()
+
             break
         except:
             if debug:
