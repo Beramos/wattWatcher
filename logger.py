@@ -124,7 +124,7 @@ def init_dataFrame(buffer_size=60):
 def main():
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
-    println(init_dataFrame(buffer_size=60))
+    print(init_dataFrame(buffer_size=60))
 
     while True:
         try:
