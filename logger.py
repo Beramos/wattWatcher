@@ -7,9 +7,6 @@
 '''
 
 import sqlite3
-conn = sqlite3.connect("energy.db")
-
-
 import serial
 import sys
 import crcmod.predefined
@@ -111,6 +108,7 @@ def init_dataFrame():
 
 
 def main():
+    conn = sqlite3.connect("energy.db")
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
     DF_logger = init_dataFrame()
@@ -119,6 +117,7 @@ def main():
         try:
             # If buffer is full write to database
             if len(DF_logger) >= buffer_size:
+                DF_logger.to_sql("data", conn, if_exists='append')
                 DF_logger = init_dataFrame()
 
             # read input from serial port
