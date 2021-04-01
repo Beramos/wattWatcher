@@ -21,7 +21,10 @@ serialport = '/dev/ttyUSB0'
 buffer_size=120
 
 # Enable debug if needed:
-debug = False
+debug = True
+
+# Database path
+path_db = "../energy.db"
 
 # Add/update OBIS codes here:
 obiscodes = {
@@ -48,7 +51,11 @@ def checkcrc(p1telegram):
         # CRC is in hex, so we need to make sure the format is correct
         givencrc = hex(int(p1telegram[match.end() + 1:].decode('ascii').strip(), 16))
     # calculate checksum of the contents
-    calccrc = hex(crcmod.predefined.mkPredefinedCrcFun('crc16')(p1contents))
+    try: 
+        calccrc = hex(crcmod.predefined.mkPredefinedCrcFun('crc16')(p1contents))
+    except UnboundLocalError:
+        calccrc = -1
+        
     # check if given and calculated match
     if debug:
         print(f"Given checksum: {givencrc}, Calculated checksum: {calccrc}")
@@ -109,7 +116,7 @@ def init_dataFrame():
 
 
 def main():
-    conn = sqlite3.connect("energy.db")
+    conn = sqlite3.connect(path_db)
     ser = serial.Serial(serialport, 115200, xonxoff=1)
     p1telegram = bytearray()
     DF_logger = init_dataFrame()
@@ -157,16 +164,11 @@ def main():
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
                     DF_logger = DF_logger.append(output_dict, ignore_index=True)
-        except KeyboardInterrupt:
-            print("Stopping...")
-            ser.close()
-
-            break
         except:
             if debug:
                 print(traceback.format_exc())
             # print(traceback.format_exc())
-            print ("Something went wrong...")
+            print("Something went wrong...")
             ser.close()
         # flush the buffer
         ser.flush()
