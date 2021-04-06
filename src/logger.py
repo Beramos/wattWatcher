@@ -55,7 +55,8 @@ def checkcrc(p1telegram):
         calccrc = hex(crcmod.predefined.mkPredefinedCrcFun('crc16')(p1contents))
     except UnboundLocalError:
         calccrc = -1
-        
+        givencrc = -1
+
     # check if given and calculated match
     if debug:
         print(f"Given checksum: {givencrc}, Calculated checksum: {calccrc}")
@@ -123,7 +124,7 @@ def main():
     DF_logger.to_sql("data", conn, if_exists='append')
 
     while True:
-        sleep(100e-6)
+        sleep(250e-6)
         try:
 
             # If buffer is full write to database
@@ -164,6 +165,9 @@ def main():
                             if debug:
                                 print(f"desc:{r[0]}, val:{r[1]}, u:{r[2]}")
                     DF_logger = DF_logger.append(output_dict, ignore_index=True)
+
+        except sqlite3.IntegrityError:     # non-unique timestamps being written to the database...
+            DF_logger = init_dataFrame()   # incidence of once per day so going to not store these values
         except:
             if debug:
                 print(traceback.format_exc())
